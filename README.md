@@ -1,4 +1,4 @@
-# Practical-Machine-Learning-Sandeep-Bisht
+# Practical-Machine-Learning-Madhan C
 Coursera Project
 
 
