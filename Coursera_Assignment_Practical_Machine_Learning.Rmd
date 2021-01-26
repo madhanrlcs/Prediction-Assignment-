@@ -1,0 +1,95 @@
+---
+title: "Prediction Assignment"
+author: "bishtsand"
+date: "14/1/2021"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Coursera Machine learning Project:
+## A. Background
+Description Copied from Site: Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+Note code reference Taken and executed in R-Studio, as a first time user.
+Note running code in R-Studio, for Report using Knite Button
+
+## B. Environment setup in iMAC
+Working Directory Setup
+```{r error=FALSE, warning=FALSE, results='hide',  message=FALSE}
+rm(list=ls())
+setwd("/Users/sandeep/bishtsandlab/RProject")
+library(lattice)
+library(ggplot2)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(corrplot)
+library(rattle)
+library(randomForest)
+library(RColorBrewer)
+set.seed(2244)
+```
+
+## C. Data Loading and cleaning
+
+```{r}
+trainingDataFromSite <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testDataFromSite  <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training <- read.csv(url(trainingDataFromSite), strip.white = TRUE, na.strings = c("NA",""))
+testing  <- read.csv(url(testDataFromSite), strip.white = TRUE, na.strings = c("NA",""))
+dim(training)
+dim(testing)
+```
+
+
+```{r}
+
+inTrain  <- createDataPartition(training$classe, p=0.75, list=FALSE)
+TrainSet <- training[inTrain, ]
+TestSet  <- training[-inTrain, ]
+
+dim(TrainSet)
+dim(TestSet)
+```
+
+Remove variables with zero variance
+```{r}
+NZV <- nearZeroVar(TrainSet)
+TrainSet <- TrainSet[, -NZV]
+TestSet  <- TestSet[, -NZV]
+
+dim(TrainSet)
+dim(TestSet)
+```
+
+Remove variables that are mostly NA
+```{r}
+AllNA    <- sapply(TrainSet, function(x) mean(is.na(x))) > 0.95
+TrainSet <- TrainSet[, AllNA==FALSE]
+TestSet  <- TestSet[, AllNA==FALSE]
+TrainSet <- TrainSet[, -(1:5)]
+TestSet  <- TestSet[, -(1:5)]
+
+dim(TrainSet)
+dim(TestSet)
+```
+
+
+## D. Data Modeling
+### Random Forest
+```{r}
+set.seed(2244)
+controlRF <- trainControl(method = "repeatedcv", number = 5, repeats = 2)
+modFitRandForest <- train(classe ~ ., data = TrainSet, method = "rf", trControl = controlRF, verbose = FALSE)
+modFitRandForest$finalModel
+```
+
+### E. Predict 
+```{r}
+predictTEST <- predict(modFitRandForest, newdata=testing)
+predictTEST
+```
