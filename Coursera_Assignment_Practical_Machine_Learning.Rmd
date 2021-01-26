@@ -1,7 +1,7 @@
 ---
 title: "Prediction Assignment"
-author: "bishtsand"
-date: "14/1/2021"
+author: "madhanlcs"
+date: "27/1/2021"
 output:
   html_document: default
 ---
